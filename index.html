@@ -1,0 +1,50 @@
+<?php
+session_start();
+$ssid = isset($_COOKIE["PHPSESSID"]) ? $_COOKIE["PHPSESSID"] : session_id();
+?>
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <title>RandomNote</title>
+  <link href="css/bootstrap.min.css" rel="stylesheet">
+  <link href="css/bootstrap-responsive.min.css" rel="stylesheet">
+</head>
+<body>
+ 
+<!-- NavBer Area -->
+<div class="navbar navbar-inverse navbar-fixed-top">
+  <div class="navbar-inner">
+    <ul class="nav navbar-nav">
+      <li class="active"><a href="#">Home</a></li>
+      <li class="inactive"><a href="./viewer.html?<?=$ssid?>">View</a></li>
+    </ul>
+    <p class="navbar-text pull-right">Signed in as <a href="#" class="navbar-link">Mark Otto</a></p>
+  </div>
+</div><br><br><br><br><br>
+
+
+<!-- Main Area -->
+<div class="container">
+  <div class="row">
+    <div class="span2"></div>
+    <div class="span8">
+      <div class="well well-lg">
+        <div class="hero-unit">
+          <h1>Random Note</h1>
+          <p>今まで忘れていた大切なノートがきっと見つかる。</p><br>
+          <button type="button" class="btn btn-success btn-large">Evernoteでログイン</button>
+          <button type="button" class="btn btn-primary btn-large">SimpleNoteでログイン</button>
+        </div>
+      </div>
+    </div>
+    <div class="span2"></div>
+  </div>
+</div>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,120 @@
+<?php
+  session_id($_COOKIE["PHPSESSID"]);
+  session_start();
+  
+  ini_set("include_path",  ini_get("include_path") . PATH_SEPARATOR .  "../../lib" . PATH_SEPARATOR);
+  
+  require_once './lib/autoload.php';
+  require_once './lib/Evernote/Client.php';
+  require_once './lib/packages/Errors/Errors_types.php';
+  require_once './lib/packages/Limits/Limits_constants.php';
+  require_once './lib/packages/Limits/Limits_types.php';
+  require_once './lib/packages/NoteStore/NoteStore_types.php';
+  require_once './lib/packages/NoteStore/NoteStore.php';
+  require_once './lib/packages/Types/Types_constants.php';
+  require_once './lib/packages/Types/Types_types.php';
+  require_once './lib/packages/UserStore/UserStore_constants.php';
+  require_once './lib/packages/UserStore/UserStore_types.php';
+  require_once './lib/packages/UserStore/UserStore.php';
+  
+  // デベロッパートークンのセット	
+  $developerToken = "S=s1:U=73a81:E=147c4ee009f:C=1406d3cd4a2:P=1cd:A=en-devtoken:V=2:H=6fcb513dd91d6bb51175a287762bae7a";
+
+  // Import the classes that we're going to be using
+  use EDAM\Types\Data, EDAM\Types\Note, EDAM\Types\Resource, EDAM\Types\ResourceAttributes;
+  use EDAM\Error\EDAMUserException, EDAM\Error\EDAMErrorCode;
+  use EDAM\NoteStore\NoteFilter;
+  use EDAM\NoteStore\NoteStoreClient;
+  use EDAM\NoteStore\NotesMetadataResultSpec;
+  use Evernote\Client;
+
+  // Clientオブジェクトの取得。
+  $client = new Client(array('token' => $developerToken));
+
+  // NoteStoreオブジェクトの取得。
+  $noteStore = $client->getNoteStore();
+ 
+  // ノートブックリストの取得。
+  $notebooks = $noteStore->listNotebooks();
+
+
+  // 検索条件設定。
+  $filter = new NoteFilter();
+  
+  $filter->ascending = false;
+
+  // 検索対象のノートブック
+  //$filter->notebookGuid = "";
+
+
+  // ノートを検索。
+  $notes = $noteStore->findNotes($developerToken, $filter, 0, 100000);
+
+  // 検索結果件数を取得。
+  $notesNum = $notes->totalNotes - 1;
+
+  // 表示するノートを選ぶ。
+  // 古めのノートを取得するように若干処理する。
+  while( true ){
+    // ローカル変数の宣言。
+    if( empty($i) ){ $i = 1; }
+    
+    // ループが3回目以上であれば抜ける。
+    if( $i++ > 3 ){ break; }
+    
+    // ノートの番号をランダムに取得する。
+    $targetNote = rand(0, $notesNum);
+
+    // わりと古いノートか判定。古ければループを抜ける。
+    // todo:日付で判定すべし。
+    if( $targetNote > ($notesNum/2) ){ break; }
+  }
+
+  // タイトルの取得。
+  $title = $notes->notes[$targetNote]->title;
+
+  // 更新日の取得。
+  $update = $notes->notes[$targetNote]->updated;
+
+  // 本文の取得。
+  $note = $noteStore->getNote( $developerToken, $notes->notes[$targetNote]->guid, true, true, true, true );
+  $content = $note->content;
+?>
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <title>RandomNote</title>
+  <link href="css/bootstrap.min.css" rel="stylesheet">
+  <link href="css/bootstrap-responsive.min.css" rel="stylesheet">
+</head>
+<body>
+ 
+<!-- NavBer Area -->
+<div class="navbar navbar-inverse navbar-fixed-top">
+  <div class="navbar-inner">
+    <ul class="nav navbar-nav">
+      <li class="active"><a href="./viewer.html">次のノート</a></li>
+    </ul>
+    <p class="navbar-text pull-right">Signed in as <a href="#" class="navbar-link">Mark Otto</a></p>
+  </div>
+</div>
+<br><br><br>
+
+<!-- Main Area -->
+<div class="container">
+  <div class="well well-lg">
+    <div class="row">
+      <div class="span2 offset10">2013-01-01</div>
+    </div>
+    <div class="page-header"><h4><?=$title?></h4></div>
+    <?=$content?>
+  </div>
+</div>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+</body>
+</html>
